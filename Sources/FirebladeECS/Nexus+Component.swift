@@ -75,14 +75,14 @@ extension Nexus {
 
     @discardableResult
     public final func remove(component componentId: ComponentIdentifier, from entityId: EntityIdentifier) -> Bool {
-        // delete component instance
+		delegate?.nexusEvent(ComponentRemoved(component: componentId, from: entityId))
+		
+		// delete component instance
         componentsByType[componentId]?.remove(at: entityId.index)
         // un-assign component from entity
         componentIdsByEntity[entityId]?.remove(componentId)
 
         update(familyMembership: entityId)
-
-        delegate?.nexusEvent(ComponentRemoved(component: componentId, from: entityId))
         return true
     }
 
