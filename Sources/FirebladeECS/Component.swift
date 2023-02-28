@@ -17,7 +17,7 @@ public protocol Component: AnyObject {
 }
 
 extension Component {
-    public static var identifier: ComponentIdentifier { ComponentIdentifier(Self.self) }
+    public static var identifier: ComponentIdentifier { ComponentIdentifier(self) }
     @inline(__always)
-    public var identifier: ComponentIdentifier { Self.identifier }
+    public var identifier: ComponentIdentifier { type(of: self).identifier }
 }
