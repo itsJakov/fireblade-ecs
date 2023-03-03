@@ -6,6 +6,14 @@
 //
 
 extension Nexus {
+	@discardableResult
+	public func createEntity(identifier entityId: EntityIdentifier) -> Entity? {
+		guard !exists(entity: entityId) else { return nil }
+		componentIdsByEntity[entityId] = []
+		delegate?.nexusEvent(EntityCreated(entityId: entityId))
+		return Entity(nexus: self, id: entityId)
+	}
+	
     @discardableResult
     public func createEntity() -> Entity {
         let entityId: EntityIdentifier = entityIdGenerator.nextId()
