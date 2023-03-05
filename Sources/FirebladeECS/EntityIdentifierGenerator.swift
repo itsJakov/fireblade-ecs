@@ -29,6 +29,8 @@ public protocol EntityIdentifierGenerator {
     /// Unused entity identifiers will again be provided with `nextId()`.
     /// - Parameter entityId: The entity id to be marked as unused.
     func markUnused(entityId: EntityIdentifier)
+	
+	func markUsed<EntityIds>(_ usedIds: EntityIds) where EntityIds: BidirectionalCollection, EntityIds.Element == EntityIdentifier
 }
 
 /// A default entity identifier generator implementation.
@@ -76,6 +78,17 @@ public struct LinearIncrementingEntityIdGenerator: EntityIdentifierGenerator {
         func markUnused(entityId: EntityIdentifier) {
             stack.append(entityId.id)
         }
+		
+		@usableFromInline
+		func markUsed<EntityIds>(_ usedIds: EntityIds) where EntityIds: BidirectionalCollection, EntityIds.Element == EntityIdentifier {
+			let initialInUse: [EntityIdentifier.Identifier] = usedIds.map { $0.id }
+			let maxInUseValue = initialInUse.max() ?? 0
+			let inUseSet = Set(initialInUse)
+			let allSet = Set(0...maxInUseValue)
+			let freeSet = allSet.subtracting(inUseSet)
+			let initialFree = Array(freeSet).sorted().reversed()
+			stack = [maxInUseValue+1] + Array(initialFree)
+		}
     }
 
     @usableFromInline let storage: Storage
@@ -100,4 +113,9 @@ public struct LinearIncrementingEntityIdGenerator: EntityIdentifierGenerator {
     public func markUnused(entityId: EntityIdentifier) {
         storage.markUnused(entityId: entityId)
     }
+	
+	@inline(__always)
+	public func markUsed<EntityIds>(_ usedIds: EntityIds) where EntityIds: BidirectionalCollection, EntityIds.Element == EntityIdentifier {
+		storage.markUsed(usedIds)
+	}
 }
